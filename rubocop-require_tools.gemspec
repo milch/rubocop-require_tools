@@ -4,7 +4,7 @@ require 'rubocop/require_tools/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'rubocop-require_tools'
-  spec.version       = Rubocop::RequireTools::VERSION
+  spec.version       = RuboCop::RequireTools::VERSION
   spec.authors       = ['Manu Wallner']
   spec.email         = ['manu@supermil.ch']
 
@@ -26,9 +26,10 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'rubocop', '~> 0.51.0'
+  spec.add_runtime_dependency 'rubocop', '~> 0.49'
 
   spec.add_development_dependency 'pry'
+
   spec.add_development_dependency 'bundler', '~> 1.16'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
