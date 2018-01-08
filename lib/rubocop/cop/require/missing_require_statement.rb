@@ -34,6 +34,7 @@ module RuboCop
           until stack.empty?
             node = stack.pop
             next unless node
+
             results = processing_methods.map { |m| self.send(m, node, processed_source) }.compact
 
             next if node.kind_of? Hash
@@ -50,7 +51,6 @@ module RuboCop
             stack.push(*children_to_explore)
           end
 
-          #
           err_events = check_timeline(timeline).group_by { |e| e[:name] }.values
           err_events.each do |events|
             first = events.first
@@ -99,6 +99,7 @@ module RuboCop
         PATTERN
 
         def process_const_assign(node, _source)
+          return unless node.kind_of? RuboCop::AST::Node
           const_assign_name = extract_const_assignment(node)
           return unless const_assign_name
 
