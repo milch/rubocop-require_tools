@@ -1,8 +1,6 @@
-# Rubocop::RequireTools
+# Require tools for Rubocop
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rubocop/require_tools`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This is an extension for rubocop. It contains tools to analyze your code and work with require statements. Currently it will only check whether there are possibly any missing requires in your code. 
 
 ## Installation
 
@@ -16,13 +14,11 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
+Then, require this extension in your project's `.rubocop.yml`:
 
-    $ gem install rubocop-require_tools
-
-## Usage
-
-TODO: Write usage instructions here
+```YAML
+require: rubocop-require_tools
+```
 
 ## Development
 
@@ -32,7 +28,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rubocop-require_tools. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/milch/rubocop-require_tools. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -40,4 +36,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the Rubocop::RequireTools project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/rubocop-require_tools/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the rubocop-require_tools project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/rubocop-require_tools/blob/master/CODE_OF_CONDUCT.md).
