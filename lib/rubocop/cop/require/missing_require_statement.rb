@@ -63,6 +63,19 @@ module RuboCop
           end
         end
 
+        def add_offense(node, location: nil, message:)
+          # Work around breaking API changes between rubocop 0.49.1 and later (...)
+          signature_old = %i[node loc message severity]
+          param_info = RuboCop::Cop::Cop.instance_method(:add_offense).parameters
+          if param_info.map(&:last) == signature_old
+            super(node, location || :expression, message)
+          elsif location
+            super(node, location: location, message: message)
+          else
+            super(node, message: message)
+          end
+        end
+
         def_node_matcher :extract_inner_const, <<-PATTERN
           (const $!nil? _)
         PATTERN
