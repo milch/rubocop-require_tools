@@ -1,7 +1,1 @@
-require "rubocop/require_tools/version"
-
-module Rubocop
-  module RequireTools
-    # Your code goes here...
-  end
-end
+require_relative 'require_tools/version'
