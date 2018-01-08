@@ -33,3 +33,6 @@ Security/MarshalLoad:
 
 Style/RedundantReturn:
   Enabled: false
+
+Style/RescueModifier:
+  Enabled: false
