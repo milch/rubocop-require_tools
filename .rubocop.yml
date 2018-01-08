@@ -1,8 +1,7 @@
-TargetRubyVersion: "2.0"
-
 AllCops:
   Exclude:
     - spec/**/*
+  TargetRubyVersion: "2.1" # 2.0 doesn't work because rubocop dropped it
 
 Style/RedundantSelf:
   Enabled: false
@@ -20,5 +19,17 @@ Metrics/MethodLength:
 Metrics/AbcSize:
   Enabled: false
 
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
 Style/ClassCheck:
+  Enabled: false
+
+Security/MarshalLoad:
+  Enabled: false
+
+Style/RedundantReturn:
   Enabled: false
