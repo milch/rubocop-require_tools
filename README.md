@@ -17,7 +17,7 @@ And then execute:
 Then, require this extension in your project's `.rubocop.yml`:
 
 ```YAML
-require: rubocop-require_tools
+require: rubocop/require_tools
 ```
 
 ## Development
@@ -36,4 +36,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the rubocop-require_tools project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/rubocop-require_tools/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the rubocop-require_tools project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/milch/rubocop-require_tools/blob/master/CODE_OF_CONDUCT.md).
