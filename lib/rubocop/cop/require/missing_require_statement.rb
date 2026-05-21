@@ -116,7 +116,17 @@ module RuboCop
           const_assign_name = extract_const_assignment(node)
           return unless const_assign_name
 
-          self.timeline << { event: :const_assign, name: const_assign_name }
+          # When the assigned value is itself a constant reference, the assignment is an
+          # alias (e.g. `Foo = Bar::Baz`). Track the target so member access through the
+          # alias (`Foo::QUX`) can be resolved to the real constant later.
+          value_node = node.children[2]
+          alias_target = nil
+          if value_node.kind_of?(RuboCop::AST::Node) && value_node.type == :const
+            consts = find_consts(value_node)
+            alias_target = consts.join('::') if consts
+          end
+
+          self.timeline << { event: :const_assign, name: const_assign_name, alias_target: alias_target }
 
           { skip: node.children }
         end
@@ -196,7 +206,7 @@ module RuboCop
               when :const_undef
                 state.undefine_const(const_name: event[:name])
               when :const_assign
-                state.const_assigned(const_name: event[:name])
+                state.const_assigned(const_name: event[:name], alias_target: event[:alias_target])
 
                 previous_errors = err_indices.map { |e| timeline[e] }
                 outdated = outdated_errors(previous_errors, state)
