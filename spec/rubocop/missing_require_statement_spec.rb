@@ -8,23 +8,23 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
   describe 'require' do
     it 'registers an offense when missing' do
       expect_offense(<<~RUBY)
-        Abbrev.abbrev(["test"])
-        ^^^^^^ `Abbrev` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+        WeakRef.new(["test"])
+        ^^^^^^^ Require/MissingRequireStatement: `WeakRef` not found, you're probably missing a require statement or there is a cycle in your dependencies.
       RUBY
     end
 
     it 'does not register an offense when present' do
       expect_no_offenses(<<~RUBY)
-        require 'abbrev'
-        Abbrev.abbrev([ "test" ])
+        require 'weakref'
+        WeakRef.new([ "test" ])
       RUBY
     end
 
     it 'registers an offense when too late' do
       expect_offense(<<~RUBY)
-        Abbrev.abbrev(["test"])
-        ^^^^^^ `Abbrev` not found, you're probably missing a require statement or there is a cycle in your dependencies.
-        require 'abbrev'
+        WeakRef.new(["test"])
+        ^^^^^^^ Require/MissingRequireStatement: `WeakRef` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+        require 'weakref'
       RUBY
     end
   end
@@ -114,7 +114,7 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
     it 'still registers an offense for member access of an unknown constant' do
       expect_offense(<<~RUBY)
         MyHTTP::Get.new('/')
-        ^^^^^^^^^^^ `MyHTTP::Get` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+        ^^^^^^^^^^^ Require/MissingRequireStatement: `MyHTTP::Get` not found, you're probably missing a require statement or there is a cycle in your dependencies.
       RUBY
     end
   end
@@ -123,7 +123,7 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
     it 'registers an offense when not available' do
       expect_offense(<<~RUBY)
       class A < B
-      ^^^^^^^^^^^ `B` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+      ^^^^^^^^^^^ Require/MissingRequireStatement: `B` not found, you're probably missing a require statement or there is a cycle in your dependencies.
       end
       RUBY
     end
@@ -139,8 +139,8 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
 
     it 'does not register an offense for required files' do
       expect_no_offenses(<<~RUBY)
-        require 'abbrev'
-        class A < Abbrev; end
+        require 'weakref'
+        class A < WeakRef; end
       RUBY
     end
   end
