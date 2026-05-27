@@ -78,6 +78,47 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
     end
   end
 
+  describe 'aliased constants' do
+    it 'does not register an offense when accessing the alias itself' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        require 'net/http'
+        MyHTTP = Net::HTTP
+        MyHTTP.new('example.com')
+      RUBY
+    end
+
+    it 'does not register an offense for member access through an alias' do
+      # `MyHTTP` is an alias for the real, loaded `Net::HTTP`, so `MyHTTP::Get`
+      # resolves to `Net::HTTP::Get` and should not be flagged.
+      expect_no_offenses(<<-RUBY.strip_indent)
+        require 'net/http'
+        MyHTTP = Net::HTTP
+        MyHTTP::Get.new('/')
+      RUBY
+    end
+
+    it 'resolves an alias that is itself a nested constant' do
+      # Mirrors the reported fastlane case: a shorthand alias for a deeply nested,
+      # already-required constant, then member access through that alias.
+      expect_no_offenses(<<-RUBY.strip_indent)
+        require 'net/http'
+        module Foo
+          HTTP = Net::HTTP
+          def self.get
+            HTTP::Get.new('/')
+          end
+        end
+      RUBY
+    end
+
+    it 'still registers an offense for member access of an unknown constant' do
+      expect_offense(<<-RUBY.strip_indent)
+        MyHTTP::Get.new('/')
+        ^^^^^^^^^^^ `MyHTTP::Get` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+      RUBY
+    end
+  end
+
   describe 'inheritance' do
     it 'registers an offense when not available' do
       expect_offense(<<-RUBY.strip_indent)
