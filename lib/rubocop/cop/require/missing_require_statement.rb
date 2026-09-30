@@ -102,9 +102,45 @@ module RuboCop
           return unless consts
           const_name = consts.join('::')
 
-          self.timeline << { event: :const_access, name: const_name, node: node }
+          self.timeline << { event: :const_access, name: const_name, node: node } unless guarded?(node, const_name)
 
           { skip: node.children }
+        end
+
+        def_node_matcher :const_defined_check, <<-PATTERN
+          (send $_ :const_defined? ({str sym} $_) ...)
+        PATTERN
+
+        # True where a check that this very constant is defined has just passed: in the true branch of
+        # an `if`, or on the right of an `&&`. Code that tests for an optional dependency is not missing a
+        # require. A check on Foo does not cover Foo::Bar, which may still not be loaded.
+        def guarded?(node, const_name)
+          child = node
+          node.each_ancestor do |ancestor|
+            return true if ancestor.type == :defined? # defined?(Foo) is itself the check, and never raises
+
+            condition = ancestor.children[0] if (ancestor.if_type? || ancestor.and_type?) && child.equal?(ancestor.children[1])
+            return true if condition && checked_constants(condition).include?(const_name)
+
+            child = ancestor
+          end
+          false
+        end
+
+        def checked_constants(condition)
+          return condition.children.flat_map { |c| checked_constants(c) } if condition.and_type?
+
+          if (checked = const_defined_check(condition))
+            receiver, name = checked
+            return [] unless receiver&.const_type?
+
+            path = find_consts(receiver).join('::')
+            return [path == 'Object' ? name.to_s : "#{path}::#{name}"]
+          end
+
+          # `defined?` cannot be written as a node pattern: the pattern language reads it as a predicate
+          checked = condition.children.first if condition.type == :defined?
+          checked&.const_type? ? [find_consts(checked).join('::')] : []
         end
 
         def_node_matcher :extract_const_assignment, <<-PATTERN
