@@ -5,6 +5,10 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
 
   let(:config) { RuboCop::Config.new }
 
+  it 'uses the cop API RuboCop does not deprecate' do
+    expect(described_class.ancestors).not_to include(RuboCop::Cop::Cop)
+  end
+
   describe 'require' do
     it 'registers an offense when missing' do
       expect_offense(<<~RUBY)
