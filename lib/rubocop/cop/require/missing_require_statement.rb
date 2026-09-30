@@ -16,7 +16,7 @@ module RuboCop
       #   require 'faraday'
       #
       #   Faraday.new
-      class MissingRequireStatement < Cop
+      class MissingRequireStatement < Base
         MSG = '`%<constant>s` not found, you\'re probably missing a require statement or there is a cycle in your dependencies.'.freeze
 
         attr_writer :timeline
@@ -26,7 +26,7 @@ module RuboCop
         end
 
         # Builds
-        def investigate(processed_source)
+        def on_new_investigation
           processing_methods = self.methods.select { |m| m.to_s.start_with? 'process_' }
 
           stack = [processed_source.ast]
@@ -60,19 +60,6 @@ module RuboCop
               constant: first[:name]
             )
             add_offense(node, message: message)
-          end
-        end
-
-        def add_offense(node, location: nil, message:)
-          # Work around breaking API changes between rubocop 0.49.1 and later (...)
-          signature_old = %i[node loc message severity]
-          param_info = RuboCop::Cop::Cop.instance_method(:add_offense).parameters
-          if param_info.map(&:last) == signature_old
-            super(node, location || :expression, message)
-          elsif location
-            super(node, location: location, message: message)
-          else
-            super(node, message: message)
           end
         end
 
