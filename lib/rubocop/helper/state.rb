@@ -5,11 +5,13 @@ module RuboCop
       attr_accessor :defined_constants
       attr_accessor :const_stack
       attr_accessor :aliases
+      attr_accessor :included_modules
 
       def initialize
         self.defined_constants = []
         self.const_stack = []
         self.aliases = {}
+        self.included_modules = [] # [nesting depth, module name]
       end
 
       def require(file: nil)
@@ -56,6 +58,13 @@ module RuboCop
 
       def undefine_const(const_name: nil) # rubocop:disable Lint/UnusedMethodArgument
         self.const_stack.pop
+        self.included_modules.reject! { |depth, _| depth > self.const_stack.length }
+      end
+
+      def include_module(name: nil)
+        prefixes = self.const_stack.reduce([]) { |a, c| a << [a.last, c].compact.join('::') }
+        full_name = ([name] + prefixes.reverse.map { |prefix| "#{prefix}::#{name}" }).find { |n| Object.const_get(n) rescue nil }
+        self.included_modules << [self.const_stack.length, full_name || name]
       end
 
       def const_assigned(const_name: nil, alias_target: nil)
@@ -81,6 +90,7 @@ module RuboCop
         unless local_only
           result = Object.const_get(name) rescue nil                                                   # Defined elsewhere, top-level
           result ||= self.defined_constants.find { |c| Object.const_get("#{c}::#{name}") rescue nil }  # Defined elsewhere, nested
+          result ||= self.included_modules.map(&:last).find { |m| Object.const_get("#{m}::#{name}") rescue nil } # From an included module
         end
 
         result ||= self.defined_constants.find { |c| name == c }                                       # Defined in this file, other module/class

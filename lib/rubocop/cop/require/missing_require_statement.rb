@@ -164,6 +164,20 @@ module RuboCop
           { skip: skip_list, push: push_list }
         end
 
+        def_node_matcher :extract_include, <<-PATTERN
+          (send nil? :include $(const ...))
+        PATTERN
+
+        # `include Foo` makes Foo's constants reachable unqualified in the enclosing class or module.
+        def process_include(node, _source)
+          return unless node.kind_of? RuboCop::AST::Node
+          included = extract_include(node)
+          return unless included
+
+          self.timeline << { event: :include, name: find_consts(included).join('::') }
+          nil
+        end
+
         def_node_matcher :extract_require, <<-PATTERN
           (send nil? ${:require :require_relative} (str $_))
         PATTERN
@@ -205,6 +219,8 @@ module RuboCop
                 err_indices = err_indices.reject { |e| outdated.include?(timeline[e]) }
               when :const_undef
                 state.undefine_const(const_name: event[:name])
+              when :include
+                state.include_module(name: event[:name])
               when :const_assign
                 state.const_assigned(const_name: event[:name], alias_target: event[:alias_target])
 

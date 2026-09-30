@@ -119,6 +119,47 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
     end
   end
 
+  describe 'included modules' do
+    it 'does not register an offense for a constant of an included module' do
+      expect_no_offenses(<<~RUBY)
+        require 'socket'
+        class A
+          include Socket::Constants
+          def family
+            AF_INET
+          end
+        end
+      RUBY
+    end
+
+    it 'registers an offense for the same constant without the include' do
+      expect_offense(<<~RUBY)
+        require 'socket'
+        class A
+          def family
+            AF_INET
+            ^^^^^^^ Require/MissingRequireStatement: `AF_INET` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+          end
+        end
+      RUBY
+    end
+
+    it 'does not carry an include over to the next class' do
+      expect_offense(<<~RUBY)
+        require 'socket'
+        class A
+          include Socket::Constants
+        end
+        class B
+          def family
+            AF_INET
+            ^^^^^^^ Require/MissingRequireStatement: `AF_INET` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+          end
+        end
+      RUBY
+    end
+  end
+
   describe 'inheritance' do
     it 'registers an offense when not available' do
       expect_offense(<<~RUBY)
