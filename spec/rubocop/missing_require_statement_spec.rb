@@ -189,4 +189,67 @@ RSpec.describe RuboCop::Cop::Require::MissingRequireStatement do
       RUBY
     end
   end
+
+  describe 'constants guarded by a check that they are defined' do
+    it 'does not register an offense inside `if Object.const_defined?`' do
+      expect_no_offenses(<<~RUBY)
+        if Object.const_defined?("Optional")
+          Optional.call
+        end
+      RUBY
+    end
+
+    it 'registers an offense for a constant nested in the checked one' do
+      # Optional can be defined while Optional::Helper is not loaded yet
+      expect_offense(<<~RUBY)
+        if Object.const_defined?("Optional")
+          Optional::Helper.call
+          ^^^^^^^^^^^^^^^^ Require/MissingRequireStatement: `Optional::Helper` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+        end
+      RUBY
+    end
+
+    it 'does not register an offense inside a chain of const_defined? checks' do
+      expect_no_offenses(<<~RUBY)
+        if Object.const_defined?("Optional") && Optional.const_defined?("UI")
+          Optional::UI.interactive?
+        end
+      RUBY
+    end
+
+    it 'does not register an offense inside `if defined?`' do
+      expect_no_offenses(<<~RUBY)
+        Optional.call if defined?(Optional)
+      RUBY
+    end
+
+    it 'registers an offense in the branch where the constant is not defined' do
+      expect_offense(<<~RUBY)
+        if Object.const_defined?("Optional")
+          true
+        else
+          Optional.call
+          ^^^^^^^^ Require/MissingRequireStatement: `Optional` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+        end
+      RUBY
+    end
+
+    it 'registers an offense for a constant the check does not cover' do
+      expect_offense(<<~RUBY)
+        if Object.const_defined?("Optional")
+          Other.call
+          ^^^^^ Require/MissingRequireStatement: `Other` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+        end
+      RUBY
+    end
+
+    it 'registers an offense when either check may be false' do
+      expect_offense(<<~RUBY)
+        if Object.const_defined?("Optional") || ready?
+          Optional.call
+          ^^^^^^^^ Require/MissingRequireStatement: `Optional` not found, you're probably missing a require statement or there is a cycle in your dependencies.
+        end
+      RUBY
+    end
+  end
 end
